@@ -14,12 +14,12 @@ export default function Talk() {
   });
 
   async function sendToGpt(prompt: string) {
-    const url = `${process.env.NEXT_PUBLIC_API_URL!}/api/chat`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL!}/api/gpt2`;
 
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: prompt }),
+      body: JSON.stringify({ message: prompt }),
     });
 
     const data = await response.json();
