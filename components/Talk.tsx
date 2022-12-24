@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Button, Input, Text, Textarea } from "@chakra-ui/react";
 import { useSpeechRecognition } from "react-speech-kit";
+import { useSpeechSynthesis, SpeechSynthesisVoice } from "react-speech-kit";
 
 export default function Talk() {
   const [value, setValue] = useState("");
@@ -12,6 +13,15 @@ export default function Talk() {
       setValue(result);
     },
   });
+  // const { speak } = useSpeechSynthesis();
+
+  const synth = window.speechSynthesis;
+  const speak = (text: string) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "es-MX"; // Set the language to Spanish
+    utterance.rate = 0.6; // Set the speed to 1.2
+    synth.speak(utterance);
+  };
 
   async function sendToGpt(prompt: string) {
     const url = `${process.env.NEXT_PUBLIC_API_URL!}/api/gpt2`;
@@ -23,7 +33,8 @@ export default function Talk() {
     });
 
     const data = await response.json();
-    console.log(data);
+
+    speak(data);
     setGptResponse(data);
   }
 
@@ -31,7 +42,7 @@ export default function Talk() {
     <div>
       <Button
         onClick={() => {
-          listen({ interimResults: true, continuous: true, language: "es-US" });
+          listen({ interimResults: true, continuous: true, language: "es-MX" });
         }}
         disabled={listening}
       >
