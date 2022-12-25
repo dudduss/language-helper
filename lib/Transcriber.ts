@@ -6,16 +6,26 @@ import {
 } from "microsoft-cognitiveservices-speech-sdk";
 
 class Transcriber {
+  private static instance: Transcriber;
+
   private _recognizer: SpeechRecognizer | undefined;
   private _callback: (result: { original: string }) => void;
 
-  constructor(callback: (result: { original: string }) => void) {
+  private constructor(callback: (result: { original: string }) => void) {
+    console.log("here in constructor");
     this._callback = callback;
   }
 
+  public static getInstance(
+    callback: (result: { original: string }) => void
+  ): Transcriber {
+    if (!Transcriber.instance) {
+      Transcriber.instance = new Transcriber(callback);
+    }
+    return Transcriber.instance;
+  }
+
   start(options: { key: string; region: string; fromLanguage: string }) {
-    console.log('here in start')
-    console.log(this._recognizer)
     const alreadyStarted = !!this._recognizer;
     if (alreadyStarted) {
       return;
@@ -42,14 +52,13 @@ class Transcriber {
       return;
     }
 
-    this._callback({
+    Transcriber.instance._callback({
       original: result.text,
     });
   }
 
   stop() {
-    console.log('here in stop')
-    console.log(this._recognizer)
+    console.log(this._recognizer);
     if (!this._recognizer) {
       return;
     }

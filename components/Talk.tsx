@@ -18,11 +18,15 @@ export default function Talk() {
   const [isRecognizing, setIsRecognizing] = useState(false);
 
   var messages: string[] = [];
+  var fullMessage: string = "sdfs";
 
-  const transcriber = new Transcriber(function (captions) {
+  const transcriber = Transcriber.getInstance(function (captions) {
     console.log("captions:", captions);
     console.log("messages: ", messages);
+    console.log("fullMessage: ", fullMessage);
     messages.push(captions.original);
+    fullMessage += captions.original;
+    setValue(fullMessage);
 
     /// combine values of string array into one string with spaces in one line
     function concat() {
@@ -32,61 +36,8 @@ export default function Talk() {
       }
       return result;
     }
-
     setValue(concat());
   });
-
-  // Listening Logic
-
-  function continuousListenting() {
-    const audioConfig = AudioConfig.fromDefaultMicrophoneInput();
-    const speechConfig = SpeechConfig.fromSubscription(
-      "7038612654d54cff9f9246acf3efea7c",
-      "westus"
-    );
-    speechConfig.speechRecognitionLanguage = "es-MX";
-
-    var recognizer: SpeechRecognizer | undefined;
-    var message: string = "";
-
-    recognizer = new SpeechRecognizer(speechConfig, audioConfig);
-
-    recognizer.recognizing = recognizer.recognized = (s, e) => {
-      if (e.result.reason === ResultReason.RecognizedSpeech) {
-        message += e.result.text;
-        setValue(message);
-      } else if (e.result.reason === ResultReason.NoMatch) {
-        console.log(`NOMATCH: Speech could not be recognized.`);
-      }
-    };
-
-    function start() {
-      recognizer!.startContinuousRecognitionAsync(
-        () => {
-          console.log("Listening");
-        },
-        (err) => {
-          console.log(err);
-        }
-      );
-    }
-
-    function stop() {
-      recognizer!.stopContinuousRecognitionAsync(
-        () => {
-          console.log("Closing");
-          message = "";
-          recognizer!.close();
-          recognizer = undefined;
-        },
-        (err) => {
-          console.log(err);
-        }
-      );
-    }
-
-    return { start, stop };
-  }
 
   // Speaking logic
   // const synth = window.speechSynthesis;
@@ -117,6 +68,9 @@ export default function Talk() {
       <Button
         onClick={() => {
           setIsRecognizing(true);
+          messages = [];
+          fullMessage = "";
+          console.log("starting from component");
           transcriber.start({
             fromLanguage: "es-MX",
             key: "7038612654d54cff9f9246acf3efea7c",
@@ -133,8 +87,9 @@ export default function Talk() {
           setIsRecognizing(false);
           transcriber.stop();
           // sendToGpt(concat());
+          // clear an array of strings
+          messages = [];
           setValue("");
-          stop();
         }}
         disabled={!isRecognizing}
       >
