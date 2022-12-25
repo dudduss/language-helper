@@ -15,7 +15,7 @@ export default async function handler(
 ) {
   if (req.method === "POST") {
     const chatRequest = req.body as ChatRequest;
-    console.log("chatRequest", chatRequest);
+    // console.log("chatRequest", chatRequest);
 
     if (!api) {
       api = new ChatGPTAPIBrowser({
@@ -26,8 +26,6 @@ export default async function handler(
       await api.initSession();
     }
 
-    console.log("conversationId", conversationId);
-    console.log("parentMessageId", parentMessageId);
 
     // add a timeout of 10 seconds here
     const result = await api.sendMessage(chatRequest.prompt, {

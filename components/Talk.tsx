@@ -13,15 +13,17 @@ export default function Talk() {
       setValue(result);
     },
   });
-  // const { speak } = useSpeechSynthesis();
 
-  const synth = window.speechSynthesis;
-  const speak = (text: string) => {
+  // Listening Logic
+
+  // Speaking logic
+  // const synth = window.speechSynthesis;
+  function speak(text: string) {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "es-MX"; // Set the language to Spanish
     utterance.rate = 0.6; // Set the speed to 1.2
-    synth.speak(utterance);
-  };
+    // synth.speak(utterance);
+  }
 
   async function sendToGpt(prompt: string) {
     const url = `${process.env.NEXT_PUBLIC_API_URL!}/api/gpt2`;

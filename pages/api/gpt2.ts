@@ -54,8 +54,6 @@ async function generateNextResponse(): Promise<string> {
     presence_penalty: 0,
   });
 
-  console.log("completion", completion);
-
   const choices: string[] = completion.data.choices.map(
     (choice) => choice.text!
   );
