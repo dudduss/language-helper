@@ -1,17 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Textarea } from "@chakra-ui/react";
-import { useSpeechRecognition } from "react-speech-kit";
+import createSpeechServicesPonyfill from "web-speech-cognitive-services";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 
 export default function Talk() {
-  const [value, setValue] = useState("");
   const [gptResponse, setGptResponse] = useState("");
-  const { listen, listening, stop } = useSpeechRecognition({
-    onResult: (result: string) => {
-      setValue(result);
-    },
-  });
+  const [isListening, setIsListening] = useState(false);
+
+  useEffect(() => {
+    const { SpeechRecognition: AzureSpeechRecognition } =
+      createSpeechServicesPonyfill({
+        credentials: {
+          region: "westus",
+          subscriptionKey: "7038612654d54cff9f9246acf3efea7c",
+        },
+      });
+    SpeechRecognition.applyPolyfill(AzureSpeechRecognition);
+  }, []);
 
   // Listening Logic
+  const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
+    useSpeechRecognition();
+
+  const startListening = () =>
+    SpeechRecognition.startListening({
+      continuous: true,
+      language: "es-MX",
+    });
+
+  const stopListening = () => {
+    SpeechRecognition.abortListening();
+  };
 
   // Speaking logic
 
@@ -26,7 +47,6 @@ export default function Talk() {
 
     const data = await response.json();
 
-    // speak(data);
     setGptResponse(data);
   }
 
@@ -34,27 +54,29 @@ export default function Talk() {
     <div>
       <Button
         onClick={() => {
-          listen({ interimResults: true, continuous: true, language: "es-MX" });
+          setIsListening(true);
+          startListening();
         }}
-        disabled={listening}
+        disabled={isListening}
       >
         Start
       </Button>
       <Button
         onClick={() => {
-          sendToGpt(value);
-          setValue("");
-          stop();
+          setIsListening(false);
+          stopListening();
+          sendToGpt(transcript);
+          resetTranscript();
         }}
-        disabled={!listening}
+        disabled={!isListening}
       >
         Stop
       </Button>
       <Textarea
-        value={value}
+        value={transcript}
         size="lg"
         resize={"vertical"}
-        onChange={(event) => setValue(event.target.value)}
+        readOnly
       ></Textarea>
       <p>{gptResponse}</p>
     </div>

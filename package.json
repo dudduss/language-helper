@@ -20,12 +20,15 @@
     "eslint": "8.30.0",
     "eslint-config-next": "13.0.7",
     "framer-motion": "^7.10.3",
+    "microsoft-cognitiveservices-speech-sdk": "^1.24.1",
     "next": "13.0.7",
     "openai": "^3.1.0",
     "puppeteer": "^19.4.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-speech-kit": "^3.0.1",
-    "typescript": "4.9.4"
+    "react-speech-recognition": "^3.10.0",
+    "typescript": "4.9.4",
+    "web-speech-cognitive-services": "^7.1.3"
   }
 }
