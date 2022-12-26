@@ -10,6 +10,10 @@ import * as speechsdk from "microsoft-cognitiveservices-speech-sdk";
 export default function Talk() {
   const [gptResponse, setGptResponse] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const [conversation, setConversation] = useState<string[]>([
+    "hello my name is",
+    "i want to practice spanish",
+  ]);
 
   useEffect(() => {
     const { SpeechRecognition: AzureSpeechRecognition } =

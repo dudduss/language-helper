@@ -16,8 +16,8 @@ export default function Home() {
           Welcome to your online Spanish tutor 🇦🇷🇪🇸🇲🇽
         </h1>
         <p className={styles.description}>
-          You can pratice your Spanish with our online tutor anytime. Just click
-          start and start talking!
+          You can practice your Spanish with our online tutor anytime. Just
+          click start and start talking!
         </p>
         <div>
           <Talk />
