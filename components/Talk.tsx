@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Button, Textarea } from "@chakra-ui/react";
 import createSpeechServicesPonyfill from "web-speech-cognitive-services";
+import createSpeechSynthesisPonyfill from "web-speech-cognitive-services";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
+import * as speechsdk from "microsoft-cognitiveservices-speech-sdk";
 
 export default function Talk() {
   const [gptResponse, setGptResponse] = useState("");
@@ -35,6 +37,28 @@ export default function Talk() {
   };
 
   // Speaking logic
+  async function speak(text: string) {
+    const speechConfig = speechsdk.SpeechConfig.fromSubscription(
+      "7038612654d54cff9f9246acf3efea7c",
+      "westus"
+    );
+    speechConfig.speechSynthesisLanguage = "es-MX";
+    const audioConfig = speechsdk.AudioConfig.fromDefaultSpeakerOutput();
+    const synthesizer = new speechsdk.SpeechSynthesizer(
+      speechConfig,
+      audioConfig
+    );
+
+    synthesizer.speakTextAsync(
+      text,
+      (result) => {
+        // console.log(result);
+      },
+      (err) => {
+        console.log(err);
+      }
+    );
+  }
 
   async function sendToGpt(prompt: string) {
     const url = `${process.env.NEXT_PUBLIC_API_URL!}/api/gpt2`;
@@ -48,6 +72,7 @@ export default function Talk() {
     const data = await response.json();
 
     setGptResponse(data);
+    speak(data);
   }
 
   return (
