@@ -1,25 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Button, Textarea, Box, Text } from "@chakra-ui/react";
+import {
+  Button,
+  Textarea,
+  Box,
+  Text,
+  IconButton,
+  HStack,
+} from "@chakra-ui/react";
+
 import createSpeechServicesPonyfill from "web-speech-cognitive-services";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 import * as speechsdk from "microsoft-cognitiveservices-speech-sdk";
 import { Message } from "../public/schemas";
-
-export function MessageBox({ message }: { message: Message }) {
-  const backgroundColor = message.isFromGpt ? "gray.200" : "blue.200";
-  const sender = message.isFromGpt ? "Linda" : "Me";
-
-  return (
-    <Box marginTop={10} marginBottom={10}>
-      <Text fontSize="2xl"> {sender} </Text>
-      <Box bg={backgroundColor} padding={10} borderRadius={20} marginTop={2}>
-        <Text fontSize="2xl">{message.text}</Text>
-      </Box>
-    </Box>
-  );
-}
+import MessageBox from "./MessageBox";
 
 export default function Talk() {
   const [isListening, setIsListening] = useState(false);
@@ -76,7 +71,7 @@ export default function Talk() {
     );
   }
 
-  function addMessageToConversation(text: string, isFromGpt: boolean) {
+  async function addMessageToConversation(text: string, isFromGpt: boolean) {
     const message: Message = {
       id: Math.random().toString(),
       text,
@@ -140,7 +135,12 @@ export default function Talk() {
         >
           Stop
         </Button>
-        <Textarea value={transcript} size="lg" resize={"vertical"}></Textarea>
+        <Textarea
+          value={transcript}
+          size="lg"
+          resize={"vertical"}
+          onChange={() => {}}
+        ></Textarea>
       </Box>
     </Box>
   );
