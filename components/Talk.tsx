@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Textarea, Box, Text, calc } from "@chakra-ui/react";
+import { Button, Textarea, Box, Text } from "@chakra-ui/react";
 import createSpeechServicesPonyfill from "web-speech-cognitive-services";
 import SpeechRecognition, {
   useSpeechRecognition,
@@ -41,11 +41,12 @@ export default function Talk() {
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
 
-  const startListening = () =>
+  const startListening = () => {
     SpeechRecognition.startListening({
       continuous: true,
       language: "es-MX",
     });
+  };
 
   const stopListening = () => {
     SpeechRecognition.abortListening();
@@ -89,7 +90,7 @@ export default function Talk() {
   }
 
   async function sendToGpt(prompt: string) {
-    const url = `${process.env.NEXT_PUBLIC_API_URL!}/api/gpt2`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL!}/api/gptResponse`;
 
     const response = await fetch(url, {
       method: "POST",
@@ -129,20 +130,17 @@ export default function Talk() {
           onClick={() => {
             setIsListening(false);
             stopListening();
-            addMessageToConversation(transcript, false);
-            sendToGpt(transcript);
+            if (transcript.length > 0) {
+              addMessageToConversation(transcript, false);
+              sendToGpt(transcript);
+            }
             resetTranscript();
           }}
           disabled={!isListening}
         >
           Stop
         </Button>
-        <Textarea
-          value={transcript}
-          size="lg"
-          resize={"vertical"}
-          readOnly
-        ></Textarea>
+        <Textarea value={transcript} size="lg" resize={"vertical"}></Textarea>
       </Box>
     </Box>
   );
