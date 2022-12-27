@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button, Textarea, Box, Text, calc } from "@chakra-ui/react";
 import createSpeechServicesPonyfill from "web-speech-cognitive-services";
-import createSpeechSynthesisPonyfill from "web-speech-cognitive-services";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
@@ -23,40 +22,9 @@ export function MessageBox({ message }: { message: Message }) {
 }
 
 export default function Talk() {
-  const [gptResponse, setGptResponse] = useState("");
   const [isListening, setIsListening] = useState(false);
-  const [conversation, setConversation] = useState<Message[]>([
-    {
-      id: "some-id",
-      text: "hello my name is hello my name is hello my name is hello my name is hello my name ishello my name ishello my name ishello my name ishello my name is",
-      isFromGpt: false,
-    },
-    {
-      id: "some-id2",
-      text: "thanks for coming thanks for comingthanks for comingthanks for comingthanks for comingthanks for coming",
-      isFromGpt: true,
-    },
-    {
-      id: "some-id",
-      text: "hello my name is hello my name is hello my name is hello my name is hello my name ishello my name ishello my name ishello my name ishello my name is",
-      isFromGpt: false,
-    },
-    {
-      id: "some-id2",
-      text: "thanks for coming thanks for comingthanks for comingthanks for comingthanks for comingthanks for coming",
-      isFromGpt: true,
-    },
-    {
-      id: "some-id",
-      text: "hello my name is hello my name is hello my name is hello my name is hello my name ishello my name ishello my name ishello my name ishello my name is",
-      isFromGpt: false,
-    },
-    {
-      id: "some-id2",
-      text: "thanks for coming thanks for comingthanks for comingthanks for comingthanks for comingthanks for coming",
-      isFromGpt: true,
-    },
-  ]);
+  const [conversation, setConversation] = useState<Message[]>([]);
+  const messagesBoxRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const { SpeechRecognition: AzureSpeechRecognition } =
@@ -107,6 +75,19 @@ export default function Talk() {
     );
   }
 
+  function addMessageToConversation(text: string, isFromGpt: boolean) {
+    const message: Message = {
+      id: Math.random().toString(),
+      text,
+      isFromGpt: isFromGpt,
+    };
+
+    setConversation((prev) => [...prev, message]);
+    if (messagesBoxRef.current) {
+      messagesBoxRef.current.scrollTo(0, messagesBoxRef.current.scrollHeight);
+    }
+  }
+
   async function sendToGpt(prompt: string) {
     const url = `${process.env.NEXT_PUBLIC_API_URL!}/api/gpt2`;
 
@@ -117,19 +98,24 @@ export default function Talk() {
     });
 
     const data = await response.json();
-
-    setGptResponse(data);
     speak(data);
+    addMessageToConversation(data, true);
   }
 
   return (
     <Box>
-      <Box overflow={"scroll"} maxHeight={700} width={"70%"} margin={"auto"}>
+      <Box
+        overflow={"scroll"}
+        maxHeight={700}
+        width={"70%"}
+        margin={"auto"}
+        ref={messagesBoxRef}
+      >
         {conversation.map((message, index) => (
           <MessageBox key={index} message={message} />
         ))}
       </Box>
-      <Box marginTop={20} position={"relative"}>
+      <Box marginTop={20} width={"70%"} margin={"auto"}>
         <Button
           onClick={() => {
             setIsListening(true);
@@ -143,7 +129,8 @@ export default function Talk() {
           onClick={() => {
             setIsListening(false);
             stopListening();
-            // sendToGpt(transcript);
+            addMessageToConversation(transcript, false);
+            sendToGpt(transcript);
             resetTranscript();
           }}
           disabled={!isListening}
@@ -156,7 +143,6 @@ export default function Talk() {
           resize={"vertical"}
           readOnly
         ></Textarea>
-        <p>{gptResponse}</p>
       </Box>
     </Box>
   );
