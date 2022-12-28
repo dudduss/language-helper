@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Configuration, OpenAIApi } from "openai";
+import { ImprovementResponse } from "../../public/schemas";
 
 type ImprovementRequest = {
   message: string;
@@ -10,7 +11,7 @@ var openai: OpenAIApi;
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<string>
+  res: NextApiResponse<ImprovementResponse>
 ) {
   if (req.method === "POST") {
     const improvementRequest = req.body as ImprovementRequest;
@@ -21,11 +22,13 @@ export default async function handler(
 }
 
 function constructPrompt(message: string): string {
-  let prompt = `Correct the Spanish sentence below in Spanish. Mention what you changed in the correction and why in a simple manner. If there are no issues, just say "Looks good!".\n\n${message}`;
+  let prompt = `Correct the Spanish sentence below in Spanish on one line. Mention what you changed in the correction and why in a simple manner on a separate line. If there are no issues, just say \"Looks good!\".\n\nSpanish Sentence: En mi opinion, me gusta la chocolate.\n\nEn mi opinión, me gusta el chocolate.\n(Changed \"la\" to \"el\" because \"chocolate\" is a masculine noun.)\n\nSpanish Sentence:${message}`;
   return prompt;
 }
 
-async function generateImprovement(message: string): Promise<string> {
+async function generateImprovement(
+  message: string
+): Promise<ImprovementResponse> {
   if (!configuration) {
     configuration = new Configuration({
       apiKey: process.env.OPENAI_API_KEY,
@@ -33,9 +36,7 @@ async function generateImprovement(message: string): Promise<string> {
     openai = new OpenAIApi(configuration);
   }
 
-  console.log("constructPrompt", constructPrompt(message));
-
-  const improvement = await openai.createCompletion({
+  const response = await openai.createCompletion({
     model: "text-davinci-003",
     prompt: constructPrompt(message),
     temperature: 0.16,
@@ -46,11 +47,29 @@ async function generateImprovement(message: string): Promise<string> {
     presence_penalty: 0,
   });
 
-  const choices: string[] = improvement.data.choices.map(
-    (choice) => choice.text!
-  );
+  const choices: string[] = response.data.choices.map((choice) => choice.text!);
 
-  console.log("choices: ", choices);
+  if (choices.length === 0) {
+    return {
+      improvement: "",
+      reason: "",
+    };
+  }
 
-  return choices[0].includes("Looks good!") ? "" : choices[0];
+  const trimmedResponse = choices[0].trimStart();
+
+  if (trimmedResponse.includes("Looks good!")) {
+    return {
+      improvement: "",
+      reason: "",
+    };
+  }
+
+  const improvement = trimmedResponse.split("\n")[0];
+  const reason = trimmedResponse.split("\n")[1];
+
+  return {
+    improvement,
+    reason,
+  };
 }

@@ -14,9 +14,13 @@ import {
 } from "@chakra-ui/react";
 import { Message } from "../public/schemas";
 import React, { useState, useEffect } from "react";
+import { ImprovementResponse } from "../public/schemas";
 
 export default function MessageBox({ message }: { message: Message }) {
-  const [improvement, setImprovement] = useState("");
+  const [improvement, setImprovement] = useState<ImprovementResponse>({
+    improvement: "",
+    reason: "",
+  });
 
   useEffect(() => {
     async function getImprovement() {
@@ -43,7 +47,7 @@ export default function MessageBox({ message }: { message: Message }) {
     <Box marginTop={10} marginBottom={10}>
       <HStack justifyContent={"space-between"}>
         <Text fontSize="2xl"> {sender} </Text>
-        {!message.isFromGpt && improvement != "" && (
+        {!message.isFromGpt && improvement.improvement != "" && (
           <Button colorScheme="blue" variant={"ghost"} onClick={onOpen}>
             {" "}
             Suggestion{" "}
@@ -51,13 +55,15 @@ export default function MessageBox({ message }: { message: Message }) {
         )}
       </HStack>
 
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={onClose} size={"3xl"}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Improvement</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Text fontSize="2xl">{improvement}</Text>
+            <Text fontSize="2xl">{improvement.improvement}</Text>
+            <br />
+            <Text fontSize="2xl">{improvement.reason}</Text>
           </ModalBody>
 
           <ModalFooter>

@@ -164,9 +164,10 @@ export default function Talk() {
               bg="blue.100"
               leftIcon={<BiSend>Send</BiSend>}
               onClick={() => {
-                addMessageToConversation(transcript, false);
-                sendToGpt(transcript);
+                addMessageToConversation(value, false);
+                sendToGpt(value);
                 resetTranscript();
+                setValue("");
               }}
               disabled={isSendingDisabled()}
               margin={1}
@@ -179,6 +180,7 @@ export default function Talk() {
               leftIcon={<AiFillCloseCircle></AiFillCloseCircle>}
               onClick={() => {
                 resetTranscript();
+                setValue("");
               }}
               disabled={isSendingDisabled()}
             >
@@ -186,35 +188,13 @@ export default function Talk() {
             </Button>
           </Box>
         </HStack>
-
-        {/* <Button
-          onClick={() => {
-            setIsListening(true);
-            startListening();
-          }}
-          disabled={isListening}
-        >
-          Start
-        </Button>
-        <Button
-          onClick={() => {
-            setIsListening(false);
-            stopListening();
-            if (transcript.length > 0) {
-              addMessageToConversation(transcript, false);
-              sendToGpt(transcript);
-            }
-            resetTranscript();
-          }}
-          disabled={!isListening}
-        >
-          Stop
-        </Button> */}
         <Textarea
-          value={transcript}
+          value={isListening ? transcript : value}
           size="lg"
           resize={"vertical"}
-          onChange={() => {}}
+          onChange={(e) => {
+            setValue(e.target.value);
+          }}
           borderWidth={5}
           marginTop={5}
         ></Textarea>
