@@ -14,12 +14,17 @@ import {
 } from "@chakra-ui/react";
 import { Message } from "../public/schemas";
 import React, { useState, useEffect } from "react";
-import { ImprovementResponse } from "../public/schemas";
+import { ImprovementResponse, DiffResponse } from "../public/schemas";
 
 export default function MessageBox({ message }: { message: Message }) {
   const [improvement, setImprovement] = useState<ImprovementResponse>({
     improvement: "",
     reason: "",
+  });
+
+  const [diff, setDiff] = useState<DiffResponse>({
+    original: [],
+    improvement: [],
   });
 
   useEffect(() => {
@@ -32,6 +37,23 @@ export default function MessageBox({ message }: { message: Message }) {
       });
       const data = await response.json();
       setImprovement(data);
+      if (data.improvement != "") {
+        getDiff().catch((err) => console.log(err));
+      }
+    }
+
+    async function getDiff() {
+      const url = `${process.env.NEXT_PUBLIC_API_URL!}/api/diff`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          original: message.text,
+          improvement: improvement.improvement,
+        }),
+      });
+      const data = await response.json();
+      console.log("data: ", data);
     }
 
     if (!message.isFromGpt) {
