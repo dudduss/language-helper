@@ -67,7 +67,7 @@ export default function MessageBox({ message }: { message: Message }) {
           </ModalFooter>
         </ModalContent>
       </Modal>
-      <Box bg={backgroundColor} padding={10} borderRadius={20} marginTop={2}>
+      <Box bg={backgroundColor} padding={7} borderRadius={20} marginTop={2}>
         <Text fontSize="2xl">{message.text}</Text>
       </Box>
     </Box>

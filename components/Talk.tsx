@@ -7,6 +7,9 @@ import {
   IconButton,
   HStack,
 } from "@chakra-ui/react";
+import { BsFillMicFill, BsStopCircleFill } from "react-icons/bs";
+import { AiFillCloseCircle } from "react-icons/ai";
+import { BiSend } from "react-icons/bi";
 
 import createSpeechServicesPonyfill from "web-speech-cognitive-services";
 import SpeechRecognition, {
@@ -19,6 +22,7 @@ import MessageBox from "./MessageBox";
 export default function Talk() {
   const [isListening, setIsListening] = useState(false);
   const [conversation, setConversation] = useState<Message[]>([]);
+  const [value, setValue] = useState<string>("");
   const messagesBoxRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -35,6 +39,8 @@ export default function Talk() {
   // Listening Logic
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
+
+  console.log("transcript", transcript);
 
   const startListening = () => {
     SpeechRecognition.startListening({
@@ -98,6 +104,16 @@ export default function Talk() {
     addMessageToConversation(data, true);
   }
 
+  function isSendingDisabled() {
+    if (isListening) {
+      return true;
+    }
+    if (transcript.length === 0) {
+      return true;
+    }
+    return false;
+  }
+
   return (
     <Box>
       <Box
@@ -111,8 +127,67 @@ export default function Talk() {
           <MessageBox key={index} message={message} />
         ))}
       </Box>
-      <Box marginTop={20} width={"70%"} margin={"auto"}>
-        <Button
+      <Box marginTop={20} width={600} margin={"auto"}>
+        <HStack justifyContent={"space-between"}>
+          <Button
+            bg={isListening ? "red.100" : "green.100"}
+            leftIcon={
+              isListening ? (
+                <BsStopCircleFill></BsStopCircleFill>
+              ) : (
+                <BsFillMicFill></BsFillMicFill>
+              )
+            }
+            disabled={!isListening && transcript.length > 0}
+            onClick={() => {
+              if (isListening) {
+                setIsListening(false);
+                stopListening();
+                if (transcript.length === 0) {
+                  resetTranscript();
+                } else {
+                  setValue(transcript);
+                }
+              } else {
+                setIsListening(true);
+                startListening();
+              }
+            }}
+          >
+            {" "}
+            {isListening ? "Stop" : "Record"}
+          </Button>
+          <Box>
+            {/* rewrite these icon button as buttons with left icons instead */}
+            <Button
+              aria-label="Send"
+              bg="blue.100"
+              leftIcon={<BiSend>Send</BiSend>}
+              onClick={() => {
+                addMessageToConversation(transcript, false);
+                sendToGpt(transcript);
+                resetTranscript();
+              }}
+              disabled={isSendingDisabled()}
+              margin={1}
+            >
+              Send
+            </Button>
+            <Button
+              aria-label="Delete"
+              bg="red.100"
+              leftIcon={<AiFillCloseCircle></AiFillCloseCircle>}
+              onClick={() => {
+                resetTranscript();
+              }}
+              disabled={isSendingDisabled()}
+            >
+              Reset
+            </Button>
+          </Box>
+        </HStack>
+
+        {/* <Button
           onClick={() => {
             setIsListening(true);
             startListening();
@@ -134,12 +209,14 @@ export default function Talk() {
           disabled={!isListening}
         >
           Stop
-        </Button>
+        </Button> */}
         <Textarea
           value={transcript}
           size="lg"
           resize={"vertical"}
           onChange={() => {}}
+          borderWidth={5}
+          marginTop={5}
         ></Textarea>
       </Box>
     </Box>
