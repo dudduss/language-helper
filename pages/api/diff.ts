@@ -42,7 +42,6 @@ export default async function handler(
       right: diffCheckRequest.improvement,
       diff_level: "word",
     };
-
     const config = {
       headers: {
         "Content-Type": "application/json",
@@ -53,7 +52,7 @@ export default async function handler(
       },
     };
 
-    axios
+    await axios
       .post<DiffCheckerAPIResponse>(
         "https://api.diffchecker.com/public/text",
         data,
@@ -71,6 +70,9 @@ export default async function handler(
             return { text: chunk.value, type: chunk.type };
           });
         });
+
+        // console.log("leftValues", leftValues);
+        // console.log("rightValues", rightValues);
 
         res.status(200).json({
           original: leftValues,

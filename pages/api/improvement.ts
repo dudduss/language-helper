@@ -56,7 +56,7 @@ async function generateImprovement(
     };
   }
 
-  const trimmedResponse = choices[0].trimStart();
+  const trimmedResponse = choices[0].replace(/\n/g, "");
 
   if (trimmedResponse.includes("Looks good!")) {
     return {
@@ -65,8 +65,11 @@ async function generateImprovement(
     };
   }
 
-  const improvement = trimmedResponse.split("\n")[0];
-  const reason = trimmedResponse.split("\n")[1];
+  const regex = /^(.*)\((.*)\)/;
+  const regexParts = trimmedResponse.match(regex) as RegExpMatchArray;
+
+  const improvement = regexParts[1];
+  const reason = regexParts[2];
 
   return {
     improvement,

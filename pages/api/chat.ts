@@ -34,8 +34,6 @@ export default async function handler(
       timeoutMs: 2 * 60 * 1000,
     });
 
-    console.log("result", result);
-
     if (!conversationId) {
       conversationId = result.conversationId;
     }

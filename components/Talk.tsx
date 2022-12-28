@@ -40,8 +40,6 @@ export default function Talk() {
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
 
-  console.log("transcript", transcript);
-
   const startListening = () => {
     SpeechRecognition.startListening({
       continuous: true,
@@ -69,7 +67,6 @@ export default function Talk() {
     synthesizer.speakTextAsync(
       text,
       (result) => {
-        // console.log(result);
       },
       (err) => {
         console.log(err);

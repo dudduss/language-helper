@@ -12,9 +12,9 @@ import {
   ModalCloseButton,
   useDisclosure,
 } from "@chakra-ui/react";
-import { Message } from "../public/schemas";
 import React, { useState, useEffect } from "react";
-import { ImprovementResponse, DiffResponse } from "../public/schemas";
+import { Message, ImprovementResponse, DiffResponse } from "../public/schemas";
+import SuggestionText from "./SuggestionText";
 
 export default function MessageBox({ message }: { message: Message }) {
   const [improvement, setImprovement] = useState<ImprovementResponse>({
@@ -38,22 +38,22 @@ export default function MessageBox({ message }: { message: Message }) {
       const data = await response.json();
       setImprovement(data);
       if (data.improvement != "") {
-        getDiff().catch((err) => console.log(err));
+        getDiff(data.improvement).catch((err) => console.log(err));
       }
     }
 
-    async function getDiff() {
+    async function getDiff(improvement: string) {
       const url = `${process.env.NEXT_PUBLIC_API_URL!}/api/diff`;
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           original: message.text,
-          improvement: improvement.improvement,
+          improvement: improvement
         }),
       });
       const data = await response.json();
-      console.log("data: ", data);
+      setDiff(data);
     }
 
     if (!message.isFromGpt) {
@@ -69,23 +69,23 @@ export default function MessageBox({ message }: { message: Message }) {
     <Box marginTop={10} marginBottom={10}>
       <HStack justifyContent={"space-between"}>
         <Text fontSize="2xl"> {sender} </Text>
-        {!message.isFromGpt && improvement.improvement != "" && (
-          <Button colorScheme="blue" variant={"ghost"} onClick={onOpen}>
-            {" "}
-            Suggestion{" "}
-          </Button>
-        )}
+        {!message.isFromGpt &&
+          improvement.improvement != "" &&
+          diff.original.length > 0 && (
+            <Button colorScheme="blue" variant={"ghost"} onClick={onOpen}>
+              {" "}
+              Suggestion{" "}
+            </Button>
+          )}
       </HStack>
 
       <Modal isOpen={isOpen} onClose={onClose} size={"3xl"}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Improvement</ModalHeader>
+          <ModalHeader fontSize={'2xl'}>Improvement</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Text fontSize="2xl">{improvement.improvement}</Text>
-            <br />
-            <Text fontSize="2xl">{improvement.reason}</Text>
+            <SuggestionText diffResponse={diff} improvement={improvement} />
           </ModalBody>
 
           <ModalFooter>

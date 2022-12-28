@@ -21,8 +21,6 @@ export default async function handler(
 
     conversation.push(nextMessage);
 
-    // console.log("conversation: ", conversation);
-
     res.status(200).json(nextMessage);
   }
 }
