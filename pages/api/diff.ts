@@ -48,7 +48,7 @@ export default async function handler(
       },
       params: {
         output_type: "json",
-        email: "sampathh.s@gmail.com",
+        email: process.env.EMAIL_ADDRESS,
       },
     };
 

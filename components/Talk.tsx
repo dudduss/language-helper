@@ -18,6 +18,7 @@ import SpeechRecognition, {
 import * as speechsdk from "microsoft-cognitiveservices-speech-sdk";
 import { Message } from "../public/schemas";
 import MessageBox from "./MessageBox";
+import axios from "axios";
 
 export default function Talk() {
   const [isListening, setIsListening] = useState(false);
@@ -26,14 +27,20 @@ export default function Talk() {
   const messagesBoxRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const { SpeechRecognition: AzureSpeechRecognition } =
-      createSpeechServicesPonyfill({
-        credentials: {
-          region: "westus",
-          subscriptionKey: "7038612654d54cff9f9246acf3efea7c",
-        },
-      });
-    SpeechRecognition.applyPolyfill(AzureSpeechRecognition);
+    async function getAzureCreds() {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL!}/api/creds?name=azure`
+      );
+      const { SpeechRecognition: AzureSpeechRecognition } =
+        createSpeechServicesPonyfill({
+          credentials: {
+            region: "westus",
+            subscriptionKey: response.data,
+          },
+        });
+      SpeechRecognition.applyPolyfill(AzureSpeechRecognition);
+    }
+    getAzureCreds();
   }, []);
 
   // Listening Logic
@@ -66,8 +73,7 @@ export default function Talk() {
 
     synthesizer.speakTextAsync(
       text,
-      (result) => {
-      },
+      (result) => {},
       (err) => {
         console.log(err);
       }
